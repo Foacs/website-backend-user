@@ -3,3 +3,8 @@
 This is the backend service for Foacs website which provides user data (_e.g. user list, user specific data, ..._).
 
 It is powered by AWS Lambda: each service method = a lambda function
+
+== General architecture
+
+This repo is part of the global architecture of the Foacs website backend. This global architecture is handled in the https://github.com/Foacs/website-backend-meta[meta repository]
+

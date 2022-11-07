@@ -1,6 +1,8 @@
 const path = require('path');
 const glob = require('glob');
-var ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const ZipPlugin = require('zip-webpack-plugin');
 
 const entryArray = glob.sync('./src/**/index.ts');
 
@@ -10,11 +12,21 @@ const entryObject = entryArray.reduce((acc, item) => {
   return acc;
 }, {});
 
+const zipPlugins = Object.keys(entryObject).map((name) => {
+  return new ZipPlugin({
+    path: path.resolve(__dirname, 'build/'),
+    filename: name,
+    extension: 'zip',
+    include: [name],
+  });
+});
+
 module.exports = {
   entry: entryObject,
   devtool: 'source-map',
   target: 'node',
-  plugins: [new ProgressBarPlugin()],
+  plugins: [...zipPlugins, new CleanWebpackPlugin(), new ProgressBarPlugin()],
+
   module: {
     rules: [
       {
