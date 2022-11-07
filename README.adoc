@@ -1,0 +1,5 @@
+= User service for Foacs website backend
+
+This is the backend service for Foacs website which provides user data (_e.g. user list, user specific data, ..._).
+
+It is powered by AWS Lambda: each service method = a lambda function
