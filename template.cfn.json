@@ -1,4 +1,22 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Resources": {}
+  "Parameters": {
+    "Env": {
+      "Type": "String",
+      "Description": "The target environment name"
+    },
+    "ApiId": {
+      "Type": "AWS::ApiGatewayV2::Api"
+    }
+  },
+  "Resources": {
+    "GetRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "ApiId"
+        }
+      }
+    }
+  }
 }

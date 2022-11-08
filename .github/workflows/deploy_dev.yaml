@@ -32,7 +32,7 @@ jobs:
         env:
           REPO: ${{ github.repository }}
         run: |
-          ENVIRONMENT="Foacs-website-be"
+          ENVIRONMENT="Foacs-website-be-user"
           ENVIRONMENT="${ENVIRONMENT}-${{ env.ENV_NAME }}"
           echo "Environment name: $ENVIRONMENT"
           echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
@@ -77,5 +77,5 @@ jobs:
         run: >
           aws cloudformation create-stack 
           --stack-name ${{ steps.env-name.outputs.environment }}
-          --template-url https://${{ secrets.AWS_BUCKET_NAME }}.s3.${{ github.event.inputs.region }}.amazonaws.com/${{ env.ENV_NAME }}/template.cfn.json
+          --template-url https://${{ secrets.AWS_BUCKET_NAME }}.s3.${{ github.event.inputs.region }}.amazonaws.com/${{ env.ENV_NAME }}/user/template.cfn.json
           --parameters ParameterKey=Env,ParameterValue=${{ env.ENV_NAME }} ParameterKey=ApiId,ParameterValue=${{ github.event.inputs.ApiId }}
