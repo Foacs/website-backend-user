@@ -21,7 +21,7 @@
     "rest-service",
     "typescript"
   ],
-  "license": "ISC",
+  "license": "CECILL-2.1",
   "bugs": {
     "url": "https://github.com/Foacs/website-backend-user/issues"
   },
