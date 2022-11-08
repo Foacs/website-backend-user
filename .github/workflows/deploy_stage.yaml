@@ -32,7 +32,7 @@ jobs:
         env:
           REPO: ${{ github.repository }}
         run: |
-          ENVIRONMENT="Foacs-website-be"
+          ENVIRONMENT="Foacs-website-be-user"
           ENVIRONMENT="${ENVIRONMENT}-${{ env.ENV_NAME }}"
           echo "Environment name: $ENVIRONMENT"
           echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
