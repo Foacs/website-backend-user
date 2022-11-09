@@ -17,15 +17,56 @@ on:
         type: string
 
 jobs:
+  setup_aws_cli:
+    name: Set up AWS CLI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache artifacts
+        id: cache-aws-cli
+        uses: actions/cache@v3
+        with:
+          path: |
+            awscliv2.zip
+            aws
+          key: ${{ runner.os }}-aws-cli
+
+      - name: Download AWS CLI
+        if: steps.cache-aws-cli.outputs.cache-hit != 'true'
+        run: |
+          echo "----Get aws cli----"
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          echo "----Unzip----"
+          unzip -q awscliv2.zip
+
+      - name: Install AWS CLI
+        run: |
+          echo "----Install----"
+          sudo ./aws/install --update 
+          echo "----Check aws----"
+          aws --version
+
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region ${{ inputs.region }}
+
   deploy:
     environment: ${{ inputs.environment }}
     name: Deploy the structure on AWS
     runs-on: ubuntu-latest
     steps:
       - name: Cache artifacts
+        id: cache-aws-cli
         uses: actions/cache@v3
-        env:
-          cache-name: cache-artifacts
+        with:
+          path: |
+            awscliv2.zip
+            aws
+          key: ${{ runner.os }}-aws-cli
+
+      - name: Cache artifacts
+        uses: actions/cache@v3
         with:
           path: |
             template.cfn.json
@@ -42,35 +83,53 @@ jobs:
           echo "Environment name: $ENVIRONMENT"
           echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
 
-      - name: Set up AWS CLI
-        run: |
-          echo "----Get aws cli----"
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          echo "----Unzip----"
-          unzip -q awscliv2.zip
-          echo "----Install----"
-          sudo ./aws/install --update 
-          echo "----Check aws----"
-          aws --version
-          echo "----Configure----"
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set default.region ${{ inputs.region }}
-
       - name: Upload CloudFormation template to S3
-        run: |
-          echo "----Sync template file to S3 bucket----"
-          aws s3 mv ./template.cfn.json s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.environment }}/user/template.cfn.json
+        run: >
+          aws s3 mv 
+          ./template.cfn.json 
+          s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.environment }}/user/template.cfn.json
 
       - name: Upload Lambda artifact to S3
-        run: |
-          echo "----Sync artifacts file to S3 bucket----"
-          aws s3 sync ./build/ s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.environment }}/user/artifacts/ --include "*.zip"
-
-      - name: Deploy backend stack
-        id: backend-stack
         run: >
+          aws s3 sync 
+          ./build/ 
+          s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.environment }}/user/artifacts/ 
+          --include "*.zip"
+
+      - name: verify template
+        id: verify_template
+        run: >
+          aws cloudformation validate-template
+          --template-url https://${{ secrets.AWS_BUCKET_NAME }}.s3.${{ inputs.region }}.amazonaws.com/${{ inputs.environment }}/user/template.cfn.json
+
+      - name: Deploy stack
+        run: >
+          if ! aws cloudformation describe-stacks 
+          --stack-name ${{ steps.env-name.outputs.environment }}; then
+        
           aws cloudformation create-stack 
           --stack-name ${{ steps.env-name.outputs.environment }}
           --template-url https://${{ secrets.AWS_BUCKET_NAME }}.s3.${{ inputs.region }}.amazonaws.com/${{ inputs.environment }}/user/template.cfn.json
           --parameters ParameterKey=Env,ParameterValue=${{ inputs.environment }} ParameterKey=api_id,ParameterValue=${{ inputs.api_iId }}
+
+        else
+
+        aws cloudformation update-stack
+        --stack-name ${{ steps.env-name.outputs.environment }}
+        --template-url https://${{ secrets.AWS_BUCKET_NAME }}.s3.${{ inputs.region }}.amazonaws.com/${{ inputs.environment }}/user/template.cfn.json
+        --parameters ParameterKey=Env,ParameterValue=${{ inputs.environment }} ParameterKey=api_id,ParameterValue=${{ inputs.api_iId }}
+
+        fi
+
+      - name: Delete template on fail
+        if: failure() && steps.verify_template.outcome != 'success'
+        run: >
+          aws s3 rm
+          s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.environment }}/user/template.cfn.json
+
+      - name: Delete artifacts on fail
+        if: failure() && steps.verify_template.outcome != 'success'
+        run: >
+          aws s3 rm
+          s3://${{ secrets.AWS_BUCKET_NAME }}/${{ inputs.environment }}/user/artifacts/
+          --recursive
