@@ -38,19 +38,6 @@ jobs:
           echo "----Unzip----"
           unzip -q awscliv2.zip
 
-      - name: Install AWS CLI
-        run: |
-          echo "----Install----"
-          sudo ./aws/install --update 
-          echo "----Check aws----"
-          aws --version
-
-      - name: Configure AWS CLI
-        run: |
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set default.region ${{ inputs.region }}
-
   deploy:
     environment: ${{ inputs.environment }}
     name: Deploy the structure on AWS
@@ -73,6 +60,19 @@ jobs:
             template.cfn.json
             build
           key: ${{ runner.os }}-artifacts-${{ inputs.environment }}
+
+      - name: Install AWS CLI
+        run: |
+          echo "----Install----"
+          sudo ./aws/install --update 
+          echo "----Check aws----"
+          aws --version
+
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region ${{ inputs.region }}
 
       - name: Configure environment name
         id: env-name
