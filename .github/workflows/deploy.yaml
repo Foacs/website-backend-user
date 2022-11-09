@@ -55,6 +55,7 @@ jobs:
     environment: ${{ inputs.environment }}
     name: Deploy the structure on AWS
     runs-on: ubuntu-latest
+    needs: setup_aws_cli
     steps:
       - name: Cache artifacts
         id: cache-aws-cli
