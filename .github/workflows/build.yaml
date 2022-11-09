@@ -1,0 +1,45 @@
+name: Build with npm
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Environment name'
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build with npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Caching node modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/ .npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+
+      - name: Cache artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            template.cfn.json
+            build
+          key: ${{ runner.os }}-artifacts-${{ inputs.environment }}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Build artifacts
+        run: |
+          npm install
+          npm run build
