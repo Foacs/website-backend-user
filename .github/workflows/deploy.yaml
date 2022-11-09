@@ -6,12 +6,15 @@ on:
       environment:
         description: 'Environment name'
         required: true
+        type: string
       region:
         description: 'AWS Region to deploy to'
         required: true
+        type: string
       api_id:
         description: ARN of the API
         required: true
+        type: string
 
 jobs:
   deploy:
