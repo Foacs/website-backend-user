@@ -2,7 +2,7 @@ on:
   workflow_dispatch:
     inputs:
       region:
-        description: 'AWS Region to deploy to'
+        description: AWS Region to deploy to
         required: true
         default: 'eu-west-3'
       api_id:
@@ -18,40 +18,14 @@ env:
 
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Caching node modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/ .npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.x
-
-      - name: Build artifacts
-        run: |
-          npm install
-          npm run build
-
+    uses: Foacs/website-backend-user/.github/workflows/build.yaml@main
   deploy:
-    name: Deploy on AWS
     environment: development
-    runs-on: ubuntu-latest
     needs: build
+    outputs:
+      env-name: ${{ steps.env-name.outputs.environment }}
     uses: Foacs/website-backend-user/.github/workflows/deploy.yaml@main
     with:
       environment: ${{ env.ENV_NAME }}
       region: ${{ inputs.region }}
       api_id: ${{ inputs.api_id }}
-    secrets: inherit

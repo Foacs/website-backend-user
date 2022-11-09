@@ -1,22 +1,33 @@
+name: Deploy to AWS
+
 on:
   workflow_call:
     inputs:
       environment:
+        description: 'Environment name'
         required: true
-        type: string
       region:
         description: 'AWS Region to deploy to'
         required: true
-        default: 'eu-west-3'
       api_id:
         description: ARN of the API
         required: true
 
 jobs:
   deploy:
+    name: Deploy the structure on AWS
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
     steps:
+      - name: Configure environment name
+        id: env-name
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          ENVIRONMENT="Foacs-website-be-user"
+          ENVIRONMENT="${ENVIRONMENT}-${{ inputs.environment }}"
+          echo "Environment name: $ENVIRONMENT"
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+
       - name: Set up AWS CLI
         run: |
           echo "----Get aws cli----"
@@ -31,16 +42,6 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set default.region ${{ inputs.region }}
-
-      - name: Configure environment name
-        id: env-name
-        env:
-          REPO: ${{ github.repository }}
-        run: |
-          ENVIRONMENT="Foacs-website-be-user"
-          ENVIRONMENT="${ENVIRONMENT}-${{ env.ENV_NAME }}"
-          echo "Environment name: $ENVIRONMENT"
-          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
 
       - name: Upload CloudFormation template to S3
         run: |
@@ -58,4 +59,4 @@ jobs:
           aws cloudformation create-stack 
           --stack-name ${{ steps.env-name.outputs.environment }}
           --template-url https://${{ secrets.AWS_BUCKET_NAME }}.s3.${{ inputs.region }}.amazonaws.com/${{ inputs.environment }}/user/template.cfn.json
-          --parameters ParameterKey=Env,ParameterValue=${{ inputs.environment }} ParameterKey=ApiId,ParameterValue=${{ inputs.api_id }}
+          --parameters ParameterKey=Env,ParameterValue=${{ inputs.environment }} ParameterKey=api_id,ParameterValue=${{ inputs.api_iId }}
