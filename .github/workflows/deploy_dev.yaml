@@ -46,7 +46,7 @@ jobs:
 
   deploy:
     name: Deploy on AWS
-    environment: ${{ env.ENV_NAME }}
+    environment: development
     runs-on: ubuntu-latest
     needs: build
     uses: Foacs/website-backend-user/.github/workflows/deploy.yaml@main
