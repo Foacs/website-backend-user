@@ -49,11 +49,9 @@ jobs:
     environment: ${{ env.ENV_NAME }}
     runs-on: ubuntu-latest
     needs: build
-    steps:
-      - name: Deploy on AWS
-        uses: Foacs/website-backend-user/.github/workflows/deploy.yaml@main
-        with:
-          environment: ${{ env.ENV_NAME }}
-          region: ${{ inputs.region }}
-          api_id: ${{ inputs.api_id }}
-        secrets: inherit
+    uses: Foacs/website-backend-user/.github/workflows/deploy.yaml@main
+    with:
+      environment: ${{ env.ENV_NAME }}
+      region: ${{ inputs.region }}
+      api_id: ${{ inputs.api_id }}
+    secrets: inherit
