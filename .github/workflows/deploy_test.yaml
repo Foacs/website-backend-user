@@ -5,7 +5,7 @@ on:
         description: 'AWS Region to deploy to'
         required: true
         default: 'eu-west-3'
-      ApiId:
+      api_id:
         description: ARN of the API
         required: true
 

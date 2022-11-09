@@ -6,7 +6,7 @@
       "Description": "The target environment name"
     },
     "ApiId": {
-      "Type": "AWS::ApiGatewayV2::Api"
+      "Type": "String"
     }
   },
   "Resources": {
@@ -15,7 +15,8 @@
       "Properties": {
         "ApiId": {
           "Ref": "ApiId"
-        }
+        },
+        "RouteKey": "GET /users"
       }
     }
   }
