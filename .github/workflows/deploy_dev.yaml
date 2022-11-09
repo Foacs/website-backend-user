@@ -18,12 +18,15 @@ env:
 
 jobs:
   build:
-    uses: Foacs/website-backend-user/.github/workflows/build.yaml@main
+    name: Build with NPM
+    uses: ./.github/workflows/build.yaml@main
 
   deploy:
-    uses: Foacs/website-backend-user/.github/workflows/deploy.yaml@main
+    name: Deploy to AWS - development
+    needs: build
+    uses: ./.github/workflows/deploy.yaml@main
     with:
-      environment: ${{ env.ENV_NAME }}
+      environment: development
       region: ${{ inputs.region }}
       api_id: ${{ inputs.api_id }}
     secrets: inherit
