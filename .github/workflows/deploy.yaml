@@ -111,14 +111,14 @@ jobs:
           aws cloudformation create-stack 
           --stack-name ${{ steps.env-name.outputs.environment }}
           --template-url https://${{ secrets.AWS_BUCKET_NAME }}.s3.${{ inputs.region }}.amazonaws.com/${{ inputs.environment }}/user/template.cfn.json
-          --parameters ParameterKey=Env,ParameterValue=${{ inputs.environment }} ParameterKey=api_id,ParameterValue=${{ inputs.api_iId }}
+          --parameters ParameterKey=Env,ParameterValue=${{ inputs.environment }} ParameterKey=ApiId,ParameterValue=${{ inputs.api_id }}
 
           else
 
           aws cloudformation update-stack
           --stack-name ${{ steps.env-name.outputs.environment }}
           --template-url https://${{ secrets.AWS_BUCKET_NAME }}.s3.${{ inputs.region }}.amazonaws.com/${{ inputs.environment }}/user/template.cfn.json
-          --parameters ParameterKey=Env,ParameterValue=${{ inputs.environment }} ParameterKey=api_id,ParameterValue=${{ inputs.api_iId }}
+          --parameters ParameterKey=Env,ParameterValue=${{ inputs.environment }} ParameterKey=ApiId,ParameterValue=${{ inputs.api_id }}
 
           fi
 
