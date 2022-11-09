@@ -22,6 +22,16 @@ jobs:
     name: Deploy the structure on AWS
     runs-on: ubuntu-latest
     steps:
+      - name: Cache artifacts
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-artifacts
+        with:
+          path: |
+            template.cfn.json
+            build
+          key: ${{ runner.os }}-artifacts
+
       - name: Configure environment name
         id: env-name
         env:
@@ -46,9 +56,6 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set default.region ${{ inputs.region }}
-
-      - name: LS
-        run: ls
 
       - name: Upload CloudFormation template to S3
         run: |
