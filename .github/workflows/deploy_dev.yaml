@@ -19,12 +19,12 @@ env:
 jobs:
   build:
     name: Build with NPM
-    uses: ./.github/workflows/build.yaml@main
+    uses: ./.github/workflows/build.yaml
 
   deploy:
     name: Deploy to AWS - development
     needs: build
-    uses: ./.github/workflows/deploy.yaml@main
+    uses: ./.github/workflows/deploy.yaml
     with:
       environment: development
       region: ${{ inputs.region }}
