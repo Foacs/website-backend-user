@@ -47,6 +47,9 @@ jobs:
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set default.region ${{ inputs.region }}
 
+      - name: LS
+        run: ls
+
       - name: Upload CloudFormation template to S3
         run: |
           echo "----Sync template file to S3 bucket----"
