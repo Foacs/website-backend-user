@@ -5,7 +5,7 @@ on:
         description: 'AWS Region to deploy to'
         required: true
         default: 'eu-west-3'
-      ApiId:
+      api_id:
         description: ARN of the API
         required: true
 
@@ -17,12 +17,9 @@ env:
   ENV_NAME: development
 
 jobs:
-  deploy:
-    name: Deploy the structure on AWS
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    environment: development
-    outputs:
-      env-name: ${{ steps.env-name.outputs.environment }}
     steps:
       - name: Caching node modules
         uses: actions/cache@v3
@@ -37,16 +34,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Configure environment name
-        id: env-name
-        env:
-          REPO: ${{ github.repository }}
-        run: |
-          ENVIRONMENT="Foacs-website-be-user"
-          ENVIRONMENT="${ENVIRONMENT}-${{ env.ENV_NAME }}"
-          echo "Environment name: $ENVIRONMENT"
-          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
-
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
         with:
@@ -57,35 +44,16 @@ jobs:
           npm install
           npm run build
 
-      - name: Set up AWS CLI
-        run: |
-          echo "----Get aws cli----"
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          echo "----Unzip----"
-          unzip -q awscliv2.zip
-          echo "----Install----"
-          sudo ./aws/install --update 
-          echo "----Check aws----"
-          aws --version
-          echo "----Configure----"
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set default.region ${{ github.event.inputs.region }}
-
-      - name: Upload CloudFormation template to S3
-        run: |
-          echo "----Sync template file to S3 bucket----"
-          aws s3 mv ./template.cfn.json s3://${{ secrets.AWS_BUCKET_NAME }}/${{ env.ENV_NAME }}/user/template.cfn.json
-
-      - name: Upload Lambda artifact to S3
-        run: |
-          echo "----Sync artifacts file to S3 bucket----"
-          aws s3 sync ./build/ s3://${{ secrets.AWS_BUCKET_NAME }}/${{ env.ENV_NAME }}/user/artifacts/ --include "*.zip"
-
-      - name: Deploy backend stack
-        id: backend-stack
-        run: >
-          aws cloudformation create-stack 
-          --stack-name ${{ steps.env-name.outputs.environment }}
-          --template-url https://${{ secrets.AWS_BUCKET_NAME }}.s3.${{ github.event.inputs.region }}.amazonaws.com/${{ env.ENV_NAME }}/user/template.cfn.json
-          --parameters ParameterKey=Env,ParameterValue=${{ env.ENV_NAME }} ParameterKey=ApiId,ParameterValue=${{ github.event.inputs.ApiId }}
+  deploy:
+    name: Deploy on AWS
+    environment: ${{ env.ENV_NAME }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy on AWS
+        uses: Foacs/website-backend-user/.github/workflows/deploy.yaml@main
+        with:
+          environment: ${{ env.ENV_NAME }}
+          region: ${{ inputs.region }}
+          api_id: ${{ inputs.api_id }}
+        secrets: inherit
