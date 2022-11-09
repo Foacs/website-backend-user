@@ -2,6 +2,11 @@ name: Build with npm
 
 on:
   workflow_call:
+    inputs:
+      environment:
+        description: 'Environment name'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -21,7 +26,7 @@ jobs:
       - name: Cache artifacts
         uses: actions/cache@v3
         env:
-          cache-name: cache-artifacts
+          cache-name: cache-artifacts-${{ inputs.environment }}
         with:
           path: |
             template.cfn.json

@@ -30,7 +30,7 @@ jobs:
           path: |
             template.cfn.json
             build
-          key: ${{ runner.os }}-artifacts
+          key: ${{ runner.os }}-artifacts-${{ inputs.environment }}
 
       - name: Configure environment name
         id: env-name

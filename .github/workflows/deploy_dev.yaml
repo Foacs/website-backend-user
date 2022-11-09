@@ -13,13 +13,12 @@ name: deploy development
 
 run-name: Deploy to development env by @${{ github.actor }}
 
-env:
-  ENV_NAME: development
-
 jobs:
   build:
     name: Build with NPM
     uses: ./.github/workflows/build.yaml
+    with:
+      environment: development
 
   deploy:
     name: Deploy to AWS - development
