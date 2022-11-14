@@ -35,9 +35,7 @@
           "S3Bucket": "foacs-website-deploys",
           "S3Key": "development/user/artifacts/get.zip"
         },
-        "Role": {
-          "Ref": "GetFunctionRole"
-        }
+        "Role": {"Fn::GetAtt": ["GetFunctionRole", "Arn"]}
       }
     },
     "GetRoute": {
