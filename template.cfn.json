@@ -10,6 +10,15 @@
     }
   },
   "Resources": {
+    "GetRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "ApiId"
+        },
+        "RouteKey": "GET /users"
+      }
+    },
     "GetFunctionRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -28,27 +37,30 @@
       }
     },
     "GetFunction": {
-      "Type": "AWS::Lambda::Function",
+      "Type": "AWS::Serverless::Function",
       "Properties": {
         "Architectures": ["arm64"],
         "FunctionName": "user-get",
         "Handler": "index.handler",
         "PackageType": "Zip",
-        "Code": {
+        "CodeUri": {
           "S3Bucket": "foacs-website-deploys",
           "S3Key": "development/user/artifacts/get.zip"
         },
+        "Events": {
+          "ApiEvent": {
+            "Type": "Api",
+            "Properties": {
+              "Method": "get",
+              "Path": "/users",
+              "RestApiId": {
+                "Ref": "ApiId"
+              }
+            }
+          }
+        },
         "Role": {"Fn::GetAtt": ["GetFunctionRole", "Arn"]},
         "Runtime": "nodejs16.x"
-      }
-    },
-    "GetRoute": {
-      "Type": "AWS::ApiGatewayV2::Route",
-      "Properties": {
-        "ApiId": {
-          "Ref": "ApiId"
-        },
-        "RouteKey": "GET /users"
       }
     }
   }
