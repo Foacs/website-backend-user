@@ -22,7 +22,7 @@
                 "Service": "lambda.amazonaws.com"
               },
               "Action": "sts:AssumeRole",
-              "ManagedPolicyArn": []
+              "ManagedPolicyArns": []
             }
           ]
         }
