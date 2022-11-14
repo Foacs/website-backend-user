@@ -59,7 +59,7 @@ jobs:
           path: |
             template.cfn.json
             build
-          key: ${{ runner.os }}-artifacts-${{ inputs.environment }}
+          key: ${{ runner.os }}-artifacts-${{ inputs.environment }}-${{ github.sha }}
 
       - name: Install AWS CLI
         run: |
