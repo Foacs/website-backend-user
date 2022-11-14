@@ -10,6 +10,37 @@
     }
   },
   "Resources": {
+    "GetFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "ManagedPolicyArn": []
+            }
+          ]
+        }
+      }
+    },
+    "GetFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": ["arm64"],
+        "Code": {
+          "S3Bucket": "foacs-website-deploys",
+          "S3Key": "development/user/artifacts/get.zip"
+        },
+        "Role": {
+          "Ref": "GetFunctionRole"
+        }
+      }
+    },
     "GetRoute": {
       "Type": "AWS::ApiGatewayV2::Route",
       "Properties": {
