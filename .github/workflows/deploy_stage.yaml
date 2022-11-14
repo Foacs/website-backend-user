@@ -5,9 +5,15 @@ on:
         description: 'AWS Region to deploy to'
         required: true
         default: 'eu-west-3'
+        type: string
       api_id:
-        description: ARN of the API
+        description: ID of the API
         required: true
+        type: string
+      root_resource_id:
+        description: ID of the root API resource
+        required: true
+        type: string
 
 name: deploy staging
 
@@ -28,4 +34,5 @@ jobs:
       environment: staging
       region: ${{ inputs.region }}
       api_id: ${{ inputs.api_id }}
+      root_resource_id: ${{ inputs.root_resource_id }}
     secrets: inherit

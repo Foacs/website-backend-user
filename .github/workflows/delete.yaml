@@ -1,0 +1,73 @@
+name: Deploy to AWS
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Environment name'
+        required: true
+        type: string
+      region:
+        description: 'AWS Region to delete from'
+        required: true
+        type: string
+
+jobs:
+  setup_aws_cli:
+    name: Set up AWS CLI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache artifacts
+        id: cache-aws-cli
+        uses: actions/cache@v3
+        with:
+          path: |
+            awscliv2.zip
+            aws
+          key: ${{ runner.os }}-aws-cli
+
+      - name: Download AWS CLI
+        if: steps.cache-aws-cli.outputs.cache-hit != 'true'
+        run: |
+          echo "----Get aws cli----"
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          echo "----Unzip----"
+          unzip -q awscliv2.zip
+
+  delete:
+    environment: ${{ inputs.environment }}
+    name: Deploy the structure on AWS
+    runs-on: ubuntu-latest
+    needs: setup_aws_cli
+    steps:
+      - name: Cache AWS CLI
+        id: cache-aws-cli
+        uses: actions/cache@v3
+        with:
+          path: |
+            awscliv2.zip
+            aws
+          key: ${{ runner.os }}-aws-cli
+
+      - name: Install AWS CLI
+        run: |
+          echo "----Install----"
+          sudo ./aws/install --update 
+          echo "----Check aws----"
+          aws --version
+
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region ${{ inputs.region }}
+
+      - name: Delete stack
+        run: >
+          aws cloudformation delete-stack 
+          --stack-name ${{ steps.env-name.outputs.environment }}
+
+      - name: Wait delete complete
+        run: >
+          aws cloudformation wait stack-delete-complete
+          --stack-name ${{ steps.env-name.outputs.environment }}

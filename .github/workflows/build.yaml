@@ -27,9 +27,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            template.cfn.json
+            infrastructure
             build
-          key: ${{ runner.os }}-artifacts-${{ inputs.environment }}
+          key: ${{ runner.os }}-artifacts-${{ inputs.environment }}-${{ github.sha }}
 
       - name: Checkout
         uses: actions/checkout@v3

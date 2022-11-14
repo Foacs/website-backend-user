@@ -1,0 +1,28 @@
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: 'AWS Region to upload to'
+        required: true
+        default: 'eu-west-3'
+        type: string
+
+name: upload staging
+
+run-name: Upload to staging env by @${{ github.actor }}
+
+jobs:
+  build:
+    name: Build with NPM
+    uses: ./.github/workflows/build.yaml
+    with:
+      environment: staging
+
+  deploy:
+    name: Upload to AWS - staging
+    needs: build
+    uses: ./.github/workflows/upload.yaml
+    with:
+      environment: staging
+      region: ${{ inputs.region }}
+    secrets: inherit

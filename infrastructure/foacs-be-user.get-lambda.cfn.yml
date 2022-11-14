@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  Env:
+    Type: String
+  BucketName:
+    Type: String
+
+Resources:
+  Function:
+    Type: AWS::Lambda::Function
+    Properties:
+      Architectures:
+        - arm64
+      Code:
+        S3Bucket: !Ref BucketName
+        S3Key: !Sub '${Env}/user/artifacts/get.zip'
+      FunctionName: !Sub '${Env}-Get-Function'
+      Handler: get/index.handler
+      Runtime: nodejs18.x
+      Role: !GetAtt FunctionRole.Arn
+  FunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+Outputs:
+  FunctionArn:
+    Value: !GetAtt Function.Arn
