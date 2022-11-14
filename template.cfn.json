@@ -21,8 +21,7 @@
               "Principal": {
                 "Service": "lambda.amazonaws.com"
               },
-              "Action": "sts:AssumeRole",
-              "ManagedPolicyArns": []
+              "Action": "sts:AssumeRole"
             }
           ]
         }
