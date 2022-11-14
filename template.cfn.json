@@ -31,6 +31,9 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Architectures": ["arm64"],
+        "FunctionName": "user-get",
+        "Handler": "index.handler",
+        "PackageType": "Zip",
         "Code": {
           "S3Bucket": "foacs-website-deploys",
           "S3Key": "development/user/artifacts/get.zip"
