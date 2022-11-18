@@ -120,7 +120,7 @@ jobs:
           --stack-name ${{ steps.env-name.outputs.environment }}
           --template-url https://${{ secrets.AWS_BUCKET_NAME }}.s3.${{ inputs.region }}.amazonaws.com/${{ inputs.environment }}/user/template.cfn.json
           --parameters ParameterKey=Env,ParameterValue=${{ inputs.environment }} ParameterKey=ApiId,ParameterValue=${{ inputs.api_id }}
-          --capabilities CAPABILITY_IAM, CAPABILITY_AUTO_EXPAND
+          --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
 
           fi
 
