@@ -6,7 +6,7 @@ on:
         required: true
         default: 'eu-west-3'
       api_id:
-        description: ARN of the API
+        description: ID of the API
         required: true
 
 name: deploy staging

@@ -1,0 +1,20 @@
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: AWS Region to delete from
+        required: true
+        default: 'eu-west-3'
+
+name: delete staging
+
+run-name: Delete staging env by @${{ github.actor }}
+
+jobs:
+  delete:
+    name: Delete staging stack
+    uses: ./.github/workflows/delete.yaml
+    with:
+      environment: staging
+      region: ${{ inputs.region }}
+    secrets: inherit
