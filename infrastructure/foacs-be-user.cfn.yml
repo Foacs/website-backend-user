@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  Env:
+    Type: String
+  Region:
+    Type: String
+  BucketName:
+    Type: String
+  RestApiId:
+    Type: String
+  RootResourceId:
+    Type: String
+
+Resources:
+  UserResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref RootResourceId
+      PathPart: users
+      RestApiId: !Ref RestApiId
+  UserGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: GET
+      Integration:
+        ConnectionType: INTERNET
+        Credentials: !GetAtt ApiGatewayRole.Arn
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - 'arn:aws:apigateway:${Region}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations'
+          - FunctionArn: !GetAtt UserGetFunction.Outputs.FunctionArn
+            Region: !Ref Region
+      ResourceId: !Ref UserResource
+      RestApiId: !Ref RestApiId
+  ApiGatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Action: sts:AssumeRole
+          Principal:
+            Service:
+              - apigateway.amazonaws.com
+      Policies:
+        - PolicyName: !Sub '${Env}-InvokeFunctionPolicy'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !GetAtt UserGetFunction.Outputs.FunctionArn
+  UserGetFunction:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${BucketName}.s3.${Region}.amazonaws.com/${Env}/user/foacs-be-user.get-lambda.cfn.yml
+      Parameters:
+        Env: !Ref Env
+        BucketName: !Ref BucketName
