@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/Foacs/website-backend-user#readme",
   "dependencies": {
-    "aws-sdk": "^2.1248.0",
+    "aws-sdk": "^2.1354.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
